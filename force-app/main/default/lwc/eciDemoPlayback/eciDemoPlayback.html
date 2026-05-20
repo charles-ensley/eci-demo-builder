@@ -1,0 +1,287 @@
+<template>
+    <template lwc:if={isLoading}>
+        <div class="slds-align_absolute-center slds-p-around_large">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+    <template lwc:if={error}>
+        <div class="slds-p-around_medium">
+            <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                <span class="slds-assistive-text">error</span>
+                <h2>Error loading video call data.</h2>
+            </div>
+        </div>
+    </template>
+
+    <template lwc:if={hasData}>
+        <!-- Call Header -->
+        <div class="call-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <lightning-icon icon-name="standard:voice_call" size="medium" class="slds-m-right_small"></lightning-icon>
+                        <div>
+                            <p class="slds-text-body_small slds-text-color_weak">Video Call</p>
+                            <h1 class="call-title">{callTitle}</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-grid slds-wrap slds-m-top_small header-meta">
+                <div class="slds-col slds-size_1-of-5 meta-item">
+                    <p class="meta-label">Call Started</p>
+                    <p class="meta-value">{callStartedFormatted}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-5 meta-item">
+                    <p class="meta-label">Call Duration</p>
+                    <p class="meta-value">{callDurationFormatted}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-5 meta-item">
+                    <p class="meta-label">Language</p>
+                    <p class="meta-value">{language}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-5 meta-item">
+                    <p class="meta-label">Related Record</p>
+                    <p class="meta-value meta-link">{relatedRecordDisplay}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-5 meta-item">
+                    <p class="meta-label">Owner Name</p>
+                    <p class="meta-value">{ownerName}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid: 3-column layout matching real ECI -->
+        <div class="slds-grid main-content">
+            <!-- Left Sidebar: Meeting Playback metadata -->
+            <div class="slds-col sidebar-panel">
+                <div class="panel-section">
+                    <h2 class="panel-title">Meeting Playback</h2>
+
+                    <!-- Participants -->
+                    <div class="slds-m-bottom_small">
+                        <h3 class="subsection-title">Participants</h3>
+                        <div class="participant-group">
+                            <div class="participant-badge customer-badge">
+                                <span class="badge-dot customer-dot"></span>
+                                Customer
+                            </div>
+                            <p class="participant-company">{customerCompany}</p>
+                            <p class="participant-name">{customerName}</p>
+                        </div>
+                        <div class="participant-group slds-m-top_x-small">
+                            <div class="participant-badge rep-badge">
+                                <span class="badge-dot rep-dot"></span>
+                                Internal Reps
+                            </div>
+                            <p class="participant-company">{internalRepCompany}</p>
+                            <p class="participant-name">{internalRepName}</p>
+                        </div>
+                    </div>
+
+                    <!-- Insights -->
+                    <div class="slds-m-bottom_small">
+                        <h3 class="subsection-title">Insights</h3>
+                        <template for:each={insightCategories} for:item="cat">
+                            <div key={cat.key} class="insight-category">
+                                <div class="insight-header" data-key={cat.key} onclick={toggleInsightCategory}>
+                                    <lightning-icon icon-name={cat.chevron} size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    <span class="insight-cat-label">{cat.label}</span>
+                                </div>
+                                <template lwc:if={cat.isExpanded}>
+                                    <div class="insight-items">
+                                        <template for:each={cat.items} for:item="item">
+                                            <span key={item.key} class="insight-pill">{item.label} ({item.count})</span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Video Player -->
+            <div class="slds-col center-panel">
+                <div class="video-container">
+                    <template lwc:if={isYouTube}>
+                        <iframe
+                            class="video-player"
+                            src={youTubeEmbedUrl}
+                            title="Video Call Recording"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    </template>
+                    <template lwc:elseif={isGoogleDrive}>
+                        <iframe
+                            class="video-player"
+                            src={googleDriveEmbedUrl}
+                            title="Video Call Recording"
+                            frameborder="0"
+                            allow="autoplay; encrypted-media"
+                            allowfullscreen>
+                        </iframe>
+                    </template>
+                    <template lwc:elseif={isDirectVideo}>
+                        <video class="video-player" controls>
+                            <source src={videoUrl} type="video/mp4"/>
+                            Your browser does not support the video tag.
+                        </video>
+                    </template>
+                    <template lwc:else>
+                        <div class="video-placeholder">
+                            <div class="play-button">
+                                <lightning-icon icon-name="utility:right" size="medium" class="play-icon"></lightning-icon>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Insights Timeline Dots -->
+                    <div class="insights-bar">
+                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div class="slds-grid slds-grid_vertical-align-center">
+                                <lightning-icon icon-name="utility:einstein" size="xx-small" class="slds-m-right_xx-small einstein-icon"></lightning-icon>
+                                <span class="slds-text-body_small">Insights &amp; Comments</span>
+                            </div>
+                            <div class="insights-bar-icons">
+                                <lightning-button-icon icon-name="utility:info" alternative-text="Info" size="small" variant="bare"></lightning-button-icon>
+                                <lightning-button-icon icon-name="utility:edit" alternative-text="Edit" size="small" variant="bare"></lightning-button-icon>
+                            </div>
+                        </div>
+                        <div class="timeline-dots">
+                            <template for:each={timelineDots} for:item="dot">
+                                <span key={dot.id} class={dot.cssClass}></span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Talk Ratios -->
+                    <div class="talk-ratios">
+                        <div class="ratio-row">
+                            <div class="ratio-bar">
+                                <div class="ratio-fill customer-fill" style={customerRatioStyle}></div>
+                            </div>
+                            <span class="ratio-pct">{customerRatioFormatted}</span>
+                        </div>
+                        <div class="ratio-row">
+                            <div class="ratio-bar">
+                                <div class="ratio-fill rep-fill" style={repRatioStyle}></div>
+                            </div>
+                            <span class="ratio-pct">{repRatioFormatted}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tabs -->
+            <div class="slds-col right-panel">
+                <div class="slds-tabs_default">
+                    <ul class="slds-tabs_default__nav" role="tablist">
+                        <li class={tabClassTranscript} role="presentation">
+                            <a class="slds-tabs_default__link" role="tab" data-tab="transcript" onclick={handleTabClick}>Transcript</a>
+                        </li>
+                        <li class={tabClassSummary} role="presentation">
+                            <a class="slds-tabs_default__link" role="tab" data-tab="summary" onclick={handleTabClick}>Summary</a>
+                        </li>
+                        <li class={tabClassInsights} role="presentation">
+                            <a class="slds-tabs_default__link" role="tab" data-tab="insights" onclick={handleTabClick}>Generative Insights</a>
+                        </li>
+                        <li class={tabClassActions} role="presentation">
+                            <a class="slds-tabs_default__link" role="tab" data-tab="actions" onclick={handleTabClick}>Recommended Actions</a>
+                        </li>
+                    </ul>
+
+                    <!-- Transcript Tab -->
+                    <template lwc:if={isTranscriptTab}>
+                        <div class="slds-tabs_default__content slds-show tab-content transcript-content">
+                            <template for:each={transcriptEntries} for:item="entry">
+                                <div key={entry.id} class="transcript-entry">
+                                    <div class="slds-grid slds-grid_vertical-align-start">
+                                        <div class="transcript-meta">
+                                            <p class="speaker-label">{entry.speakerLabel}</p>
+                                            <p class="timestamp">{entry.timestamp}</p>
+                                        </div>
+                                        <div class="transcript-text">
+                                            <template lwc:if={entry.hasInsights}>
+                                                <template for:each={entry.insights} for:item="insight">
+                                                    <span key={insight} class="transcript-insight-tag">{insight}</span>
+                                                </template>
+                                            </template>
+                                            <p>{entry.text}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Summary Tab -->
+                    <template lwc:if={isSummaryTab}>
+                        <div class="slds-tabs_default__content slds-show tab-content">
+                            <div class="summary-section">
+                                <div class="einstein-badge slds-m-bottom_small">
+                                    <lightning-icon icon-name="utility:einstein" size="xx-small" class="slds-m-right_xx-small einstein-icon"></lightning-icon>
+                                    <span class="einstein-label">Einstein</span>
+                                    <span class="slds-text-body_small slds-text-color_weak slds-m-left_medium">Created by Einstein</span>
+                                </div>
+
+                                <h3 class="summary-heading">Customer Impression</h3>
+                                <p class="summary-text">{customerImpression}</p>
+
+                                <h3 class="summary-heading slds-m-top_medium">Call Summary</h3>
+                                <p class="summary-text">{callSummary}</p>
+
+                                <h3 class="summary-heading slds-m-top_medium">Next Steps</h3>
+                                <div class="next-steps-list">
+                                    <template for:each={nextStepsList} for:item="step">
+                                        <p key={step.id} class="next-step-item">{step.number}. {step.text}</p>
+                                    </template>
+                                </div>
+
+                                <div class="summary-actions slds-m-top_medium">
+                                    <lightning-button-icon icon-name="utility:copy_to_clipboard" alternative-text="Copy" title="Copy to Clipboard" onclick={handleCopySummary}></lightning-button-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Generative Insights Tab -->
+                    <template lwc:if={isInsightsTab}>
+                        <div class="slds-tabs_default__content slds-show tab-content">
+                            <template for:each={generativeInsights} for:item="gi">
+                                <div key={gi.id} class="gi-card slds-m-bottom_medium">
+                                    <h3 class="gi-question">{gi.question}</h3>
+                                    <p class="gi-answer">{gi.answer}</p>
+                                    <div class="gi-footer slds-m-top_x-small">
+                                        <div class="einstein-badge">
+                                            <lightning-icon icon-name="utility:einstein" size="xx-small" class="slds-m-right_xx-small einstein-icon"></lightning-icon>
+                                            <span class="slds-text-body_small slds-text-color_weak">Created by Einstein</span>
+                                        </div>
+                                        <div class="gi-feedback">
+                                            <lightning-button-icon icon-name="utility:copy_to_clipboard" alternative-text="Copy" size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:like" alternative-text="Helpful" size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:dislike" alternative-text="Not helpful" size="small"></lightning-button-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Recommended Actions Tab -->
+                    <template lwc:if={isActionsTab}>
+                        <div class="slds-tabs_default__content slds-show tab-content">
+                            <c-eci-recommended-actions
+                                record-id={recordId}
+                                onrecommendationexecuted={handleRecommendationExecuted}>
+                            </c-eci-recommended-actions>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

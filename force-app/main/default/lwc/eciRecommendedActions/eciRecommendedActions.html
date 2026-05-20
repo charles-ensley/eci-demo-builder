@@ -1,0 +1,57 @@
+<template>
+    <template lwc:if={isLoading}>
+        <div class="slds-align_absolute-center slds-p-around_medium">
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </div>
+    </template>
+
+    <template lwc:if={hasRecommendations}>
+        <div class="rec-header slds-p-bottom_small">
+            <h3 class="rec-section-title">Recommended Actions</h3>
+            <p class="rec-subtitle">Based on conversation insights</p>
+        </div>
+
+        <template for:each={recommendations} for:item="rec">
+            <div key={rec.Id} class={rec.cardClass}>
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start">
+                    <div class="slds-col slds-grow">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                            <span class="rec-number">{rec.displayNumber}</span>
+                            <h4 class="rec-title">{rec.Recommendation_Title__c}</h4>
+                        </div>
+                        <p class="rec-rationale">{rec.Rationale__c}</p>
+                        <template lwc:if={rec.Recommendation_Detail__c}>
+                            <p class="rec-detail slds-m-top_xx-small">{rec.Recommendation_Detail__c}</p>
+                        </template>
+                    </div>
+                    <div class="slds-col slds-shrink-none slds-m-left_small rec-action-col">
+                        <template lwc:if={rec.isCompleted}>
+                            <lightning-button
+                                label="Completed"
+                                variant="success"
+                                icon-name="utility:check"
+                                disabled
+                                class="rec-btn">
+                            </lightning-button>
+                        </template>
+                        <template lwc:else>
+                            <lightning-button
+                                label={rec.buttonLabel}
+                                variant="brand"
+                                data-id={rec.Id}
+                                onclick={handleExecute}
+                                class="rec-btn">
+                            </lightning-button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </template>
+
+    <template lwc:elseif={showEmpty}>
+        <div class="slds-align_absolute-center slds-p-around_large">
+            <p class="slds-text-color_weak">No recommendations generated for this call.</p>
+        </div>
+    </template>
+</template>

@@ -1,0 +1,17 @@
+# Salesforce
+.sfdx/
+.sf/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if LWC tests added later)
+node_modules/

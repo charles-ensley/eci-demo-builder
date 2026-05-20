@@ -1,0 +1,46 @@
+.step-content {
+    min-height: 400px;
+}
+
+.step-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+.step-desc {
+    font-size: 0.875rem;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+    margin-top: 0.25rem;
+}
+
+.nav-buttons {
+    border-top: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    padding-top: 1rem;
+}
+
+.transcript-builder-row {
+    border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    border-radius: 4px;
+    padding: 0.5rem;
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+}
+
+.delete-btn {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-error-base-40, #ea001e);
+}
+
+.qa-row {
+    border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.rec-builder-card {
+    border-radius: 6px;
+}
+
+.review-section .slds-dl_horizontal__label {
+    font-weight: 600;
+    min-width: 140px;
+}

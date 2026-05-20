@@ -1,0 +1,341 @@
+<template>
+    <lightning-card title="ECI Demo Builder" icon-name="standard:voice_call">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+            <!-- Progress Indicator -->
+            <lightning-progress-indicator current-step={currentStep} type="base" variant="base" class="slds-m-bottom_medium">
+                <lightning-progress-step label="Call Setup" value="1"></lightning-progress-step>
+                <lightning-progress-step label="Narrative" value="2"></lightning-progress-step>
+                <lightning-progress-step label="Transcript" value="3"></lightning-progress-step>
+                <lightning-progress-step label="Summary &amp; Insights" value="4"></lightning-progress-step>
+                <lightning-progress-step label="Recommendations" value="5"></lightning-progress-step>
+                <lightning-progress-step label="Review" value="6"></lightning-progress-step>
+            </lightning-progress-indicator>
+
+            <!-- Step 1: Call Setup -->
+            <template lwc:if={isStep1}>
+                <div class="step-content">
+                    <h2 class="step-title">Call Setup</h2>
+                    <p class="step-desc">Enter the basic information about the video call.</p>
+
+                    <div class="slds-grid slds-wrap slds-gutters_small slds-m-top_medium">
+                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                            <lightning-input label="Call Title" value={callTitle}
+                                placeholder="e.g. Datanet, Inc. - Competitor Replacement - 56k"
+                                onchange={handleInputChange} data-field="callTitle" required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Customer Name" value={customerName}
+                                placeholder="Alex Morgan" onchange={handleInputChange} data-field="customerName"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Customer Company" value={customerCompany}
+                                placeholder="Datanet, Inc." onchange={handleInputChange} data-field="customerCompany"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Internal Rep Name" value={internalRepName}
+                                placeholder="Your name or demo rep name" onchange={handleInputChange} data-field="internalRepName"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Internal Rep Company" value={internalRepCompany}
+                                placeholder="Your company name" onchange={handleInputChange} data-field="internalRepCompany"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input type="datetime" label="Call Started" value={callStarted}
+                                onchange={handleInputChange} data-field="callStarted"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input type="number" label="Call Duration (minutes)" value={callDurationMinutes}
+                                min="1" max="120" onchange={handleInputChange} data-field="callDurationMinutes"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Language" value={language}
+                                onchange={handleInputChange} data-field="language"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Related Account ID" value={relatedAccountId}
+                                placeholder="Paste an Account record ID (optional)"
+                                onchange={handleInputChange} data-field="relatedAccountId"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input label="Related Record Display" value={relatedRecordDisplay}
+                                placeholder="e.g. Datanet, Inc. - Additional Products - 511k"
+                                onchange={handleInputChange} data-field="relatedRecordDisplay"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                            <lightning-input type="url" label="Video URL (optional)" value={videoUrl}
+                                placeholder="https://..." onchange={handleInputChange} data-field="videoUrl"></lightning-input>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Step 2: Narrative -->
+            <template lwc:if={isStep2}>
+                <div class="step-content">
+                    <h2 class="step-title">Call Narrative</h2>
+                    <p class="step-desc">Describe the scenario and key topics. Selecting a template pre-fills defaults you can customize.</p>
+
+                    <div class="slds-m-top_medium slds-m-bottom_small">
+                        <lightning-combobox label="Scenario Template" value={scenarioType}
+                            options={scenarioOptions} onchange={handleScenarioChange}
+                            placeholder="Select a scenario..."></lightning-combobox>
+                    </div>
+
+                    <lightning-textarea label="Call Narrative" value={callNarrative}
+                        placeholder="Describe what happened on the call -- the context, key discussion points, and outcome..."
+                        max-length="5000" onchange={handleInputChange} data-field="callNarrative"
+                        class="slds-m-bottom_small"></lightning-textarea>
+
+                    <div class="slds-grid slds-wrap slds-gutters_small">
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-textarea label="Key Products Discussed (one per line)" value={keyProductsText}
+                                placeholder="e.g.&#10;Intermediate Subscription&#10;Advanced Subscription&#10;Premium Add-On"
+                                onchange={handleInputChange} data-field="keyProductsText"></lightning-textarea>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-textarea label="Key Objections Raised (one per line)" value={keyObjectionsText}
+                                placeholder="e.g.&#10;Need corporate approval for purchases&#10;Not sure we need the advanced tier"
+                                onchange={handleInputChange} data-field="keyObjectionsText"></lightning-textarea>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-combobox label="Customer Sentiment" value={customerSentiment}
+                                options={sentimentOptions} onchange={handleInputChange} data-field="customerSentiment"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                            <lightning-input type="toggle" label="Pricing Discussed?" checked={pricingDiscussed}
+                                onchange={handleToggle} data-field="pricingDiscussed"></lightning-input>
+                        </div>
+                        <template lwc:if={pricingDiscussed}>
+                            <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                <lightning-textarea label="Pricing Details" value={pricingDetails}
+                                    placeholder="Describe pricing discussed -- amounts, terms, discounts..."
+                                    onchange={handleInputChange} data-field="pricingDetails"></lightning-textarea>
+                            </div>
+                        </template>
+                    </div>
+
+                    <lightning-textarea label="Next Steps (one per line)" value={nextStepsText}
+                        placeholder="e.g.&#10;Send pricing proposal by Friday&#10;Schedule demo of Advanced tier next week&#10;Alex to discuss with corporate"
+                        onchange={handleInputChange} data-field="nextStepsText"></lightning-textarea>
+                </div>
+            </template>
+
+            <!-- Step 3: Transcript -->
+            <template lwc:if={isStep3}>
+                <div class="step-content">
+                    <h2 class="step-title">Transcript</h2>
+                    <p class="step-desc">The transcript will be auto-generated from your narrative. You can also add or edit entries manually.</p>
+
+                    <div class="slds-m-bottom_medium">
+                        <lightning-button label="Generate from Narrative" variant="brand" onclick={handleGenerateTranscript}
+                            icon-name="utility:magicwand" class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Add Entry" variant="neutral" onclick={handleAddTranscriptEntry}
+                            icon-name="utility:add"></lightning-button>
+                    </div>
+
+                    <template lwc:if={hasTranscriptEntries}>
+                        <div class="transcript-builder">
+                            <template for:each={wizardTranscriptEntries} for:item="entry">
+                                <div key={entry.id} class="transcript-builder-row slds-m-bottom_x-small">
+                                    <div class="slds-grid slds-gutters_x-small slds-grid_vertical-align-start">
+                                        <div class="slds-col slds-size_2-of-12">
+                                            <lightning-combobox label="Speaker" value={entry.speaker}
+                                                options={speakerOptions} data-index={entry.index}
+                                                onchange={handleTranscriptFieldChange} data-tfield="speaker"
+                                                variant="label-hidden"></lightning-combobox>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-12">
+                                            <lightning-input label="Time" value={entry.timestamp}
+                                                data-index={entry.index} onchange={handleTranscriptFieldChange}
+                                                data-tfield="timestamp" variant="label-hidden"
+                                                placeholder="00:00"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_7-of-12">
+                                            <lightning-textarea label="Text" value={entry.text}
+                                                data-index={entry.index} onchange={handleTranscriptFieldChange}
+                                                data-tfield="text" variant="label-hidden"
+                                                placeholder="What was said..."></lightning-textarea>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-12">
+                                            <lightning-input label="Tags" value={entry.insightsText}
+                                                data-index={entry.index} onchange={handleTranscriptFieldChange}
+                                                data-tfield="insightsText" variant="label-hidden"
+                                                placeholder="Tags"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-12">
+                                            <lightning-button-icon icon-name="utility:delete"
+                                                alternative-text="Remove" data-index={entry.index}
+                                                onclick={handleRemoveTranscriptEntry} variant="bare"
+                                                class="delete-btn"></lightning-button-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template lwc:else>
+                        <div class="slds-illustration slds-illustration_small slds-p-around_large">
+                            <p class="slds-text-color_weak slds-text-align_center">
+                                Click "Generate from Narrative" to auto-create transcript entries, or add them manually.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Step 4: Summary & Insights -->
+            <template lwc:if={isStep4}>
+                <div class="step-content">
+                    <h2 class="step-title">Summary &amp; Insights</h2>
+                    <p class="step-desc">These will appear on the Summary and Generative Insights tabs. Edit to match your story.</p>
+
+                    <div class="slds-m-top_medium">
+                        <lightning-textarea label="Customer Impression" value={summaryCustomerImpression}
+                            onchange={handleInputChange} data-field="summaryCustomerImpression"
+                            placeholder="How the customer felt about the call..."
+                            class="slds-m-bottom_small"></lightning-textarea>
+
+                        <lightning-textarea label="Call Summary" value={summaryCallOverview}
+                            onchange={handleInputChange} data-field="summaryCallOverview"
+                            placeholder="Overview of what was discussed..."
+                            class="slds-m-bottom_small"></lightning-textarea>
+
+                        <lightning-textarea label="Next Steps (for summary display)" value={summaryNextSteps}
+                            onchange={handleInputChange} data-field="summaryNextSteps"
+                            placeholder="Numbered list of next steps..."
+                            class="slds-m-bottom_medium"></lightning-textarea>
+
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Generative Insights (Q&amp;A)</h3>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                            These appear as AI-generated Q&amp;A cards on the Generative Insights tab.
+                        </p>
+
+                        <template for:each={wizardInsightQAs} for:item="qa">
+                            <div key={qa.id} class="qa-row slds-m-bottom_small">
+                                <div class="slds-grid slds-gutters_x-small">
+                                    <div class="slds-col slds-size_4-of-12">
+                                        <lightning-input label="Question" value={qa.question}
+                                            data-index={qa.index} onchange={handleQAChange}
+                                            data-qafield="question"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_7-of-12">
+                                        <lightning-textarea label="Answer" value={qa.answer}
+                                            data-index={qa.index} onchange={handleQAChange}
+                                            data-qafield="answer"></lightning-textarea>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-12 slds-grid slds-grid_vertical-align-end">
+                                        <lightning-button-icon icon-name="utility:delete"
+                                            alternative-text="Remove" data-index={qa.index}
+                                            onclick={handleRemoveQA} variant="bare"></lightning-button-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <lightning-button label="Add Q&amp;A" variant="neutral" onclick={handleAddQA}
+                            icon-name="utility:add" class="slds-m-top_x-small"></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Step 5: Recommendations -->
+            <template lwc:if={isStep5}>
+                <div class="step-content">
+                    <h2 class="step-title">Recommended Actions</h2>
+                    <p class="step-desc">Define actionable recommendations. When clicked in the demo, these create real records.</p>
+
+                    <div class="slds-m-top_medium">
+                        <template for:each={wizardRecommendations} for:item="rec">
+                            <div key={rec.id} class="rec-builder-card slds-box slds-m-bottom_small">
+                                <div class="slds-grid slds-wrap slds-gutters_x-small">
+                                    <div class="slds-col slds-size_8-of-12 slds-m-bottom_x-small">
+                                        <lightning-input label="Title" value={rec.title}
+                                            data-index={rec.index} onchange={handleRecChange}
+                                            data-rfield="title"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_4-of-12 slds-m-bottom_x-small">
+                                        <lightning-combobox label="Action Type" value={rec.actionType}
+                                            options={actionTypeOptions} data-index={rec.index}
+                                            onchange={handleRecChange} data-rfield="actionType"></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_12-of-12 slds-m-bottom_x-small">
+                                        <lightning-input label="Rationale (because...)" value={rec.rationale}
+                                            data-index={rec.index} onchange={handleRecChange}
+                                            data-rfield="rationale"
+                                            placeholder="because this will help..."></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_8-of-12 slds-m-bottom_x-small">
+                                        <lightning-textarea label="Detail (optional)" value={rec.detail}
+                                            data-index={rec.index} onchange={handleRecChange}
+                                            data-rfield="detail"></lightning-textarea>
+                                    </div>
+                                    <div class="slds-col slds-size_4-of-12 slds-m-bottom_x-small">
+                                        <lightning-input label="Button Label" value={rec.buttonLabel}
+                                            data-index={rec.index} onchange={handleRecChange}
+                                            data-rfield="buttonLabel" placeholder="Create Task"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_11-of-12"></div>
+                                    <div class="slds-col slds-size_1-of-12 slds-text-align_right">
+                                        <lightning-button-icon icon-name="utility:delete"
+                                            alternative-text="Remove" data-index={rec.index}
+                                            onclick={handleRemoveRec} variant="bare"></lightning-button-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <lightning-button label="Add Recommendation" variant="neutral" onclick={handleAddRec}
+                            icon-name="utility:add"></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Step 6: Review -->
+            <template lwc:if={isStep6}>
+                <div class="step-content">
+                    <h2 class="step-title">Review &amp; Generate</h2>
+                    <p class="step-desc">Review your inputs and generate the demo video call record.</p>
+
+                    <div class="review-section slds-m-top_medium">
+                        <div class="slds-box slds-m-bottom_small">
+                            <h3 class="slds-text-heading_small slds-m-bottom_x-small">Call Details</h3>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">Title:</dt>
+                                <dd class="slds-dl_horizontal__detail">{callTitle}</dd>
+                                <dt class="slds-dl_horizontal__label">Customer:</dt>
+                                <dd class="slds-dl_horizontal__detail">{customerName} ({customerCompany})</dd>
+                                <dt class="slds-dl_horizontal__label">Rep:</dt>
+                                <dd class="slds-dl_horizontal__detail">{internalRepName}</dd>
+                                <dt class="slds-dl_horizontal__label">Scenario:</dt>
+                                <dd class="slds-dl_horizontal__detail">{scenarioType}</dd>
+                                <dt class="slds-dl_horizontal__label">Transcript:</dt>
+                                <dd class="slds-dl_horizontal__detail">{transcriptCount} entries</dd>
+                                <dt class="slds-dl_horizontal__label">Recommendations:</dt>
+                                <dd class="slds-dl_horizontal__detail">{recommendationCount} actions</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Navigation -->
+            <div class="slds-grid slds-grid_align-spread slds-m-top_medium nav-buttons">
+                <div>
+                    <template lwc:if={canGoBack}>
+                        <lightning-button label="Back" onclick={handleBack} variant="neutral"></lightning-button>
+                    </template>
+                </div>
+                <div>
+                    <template lwc:if={canGoNext}>
+                        <lightning-button label="Next" onclick={handleNext} variant="brand"></lightning-button>
+                    </template>
+                    <template lwc:if={isStep6}>
+                        <lightning-button label="Generate Demo Call" onclick={handleGenerate}
+                            variant="brand" icon-name="utility:magicwand"
+                            disabled={isGenerating}></lightning-button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

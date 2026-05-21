@@ -24,8 +24,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.625rem 0.75rem;
-    background: var(--slds-g-color-neutral-base-10, #181818);
-    color: #ffffff;
+    background: var(--slds-g-color-neutral-base-100, #ffffff);
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
     border-radius: 8px 8px 0 0;
     min-height: 44px;
     flex-shrink: 0;
@@ -33,6 +34,7 @@
 
 .minimized .explorer-header {
     border-radius: 8px;
+    border-bottom: none;
 }
 
 .header-left {

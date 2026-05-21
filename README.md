@@ -6,6 +6,7 @@ A drop-in Salesforce demo asset that replicates Einstein Conversation Insights (
 
 - **ECI Demo Wizard** -- A multi-step UI where you input customer details, call narrative, and scenario type. The wizard auto-generates transcripts, summaries, insights, and recommendations that you can preview and edit before creating the record.
 - **ECI Playback Page** -- A record page component that mirrors the real ECI Video Call experience: 3-column layout with participant sidebar, center video player (supports YouTube, Google Drive, or direct video URLs), and tabbed panels for Transcript, Summary, Generative Insights, and Recommended Actions.
+- **Call Explorer** -- A floating chat dialog (launched via the "Explore Conversation" button above the video) that lets users ask questions about the call. Answers are generated from pre-built Q&A pairs and transcript keyword matching -- no AI required, but looks just like the real thing.
 - **Recommended Actions** -- AI-style recommendation cards that create real Salesforce records when clicked (Tasks, Opportunities, Events, Contacts, and more).
 
 ## Prerequisites
@@ -21,14 +22,10 @@ A drop-in Salesforce demo asset that replicates Einstein Conversation Insights (
 git clone https://github.com/charles-ensley/eci-demo-builder.git
 cd eci-demo-builder
 
-# Deploy and assign permissions in one step
-./scripts/setup.sh <your-org-alias>
-```
-
-Or if you prefer to do it manually:
-
-```bash
+# Deploy to your default org
 sf project deploy start --target-org <your-org-alias>
+
+# Assign the permission set to your user
 sf org assign permset --name ECI_Demo_User --target-org <your-org-alias>
 ```
 
@@ -60,6 +57,7 @@ sf org assign permset --name ECI_Demo_User --target-org <your-org-alias>
 | `eciDemoPlayback` | LWC | 3-column ECI-style record page component |
 | `eciDemoWizard` | LWC | 6-step demo call creation wizard |
 | `eciRecommendedActions` | LWC | Recommendation cards with record creation |
+| `eciCallExplorer` | LWC | Floating Call Explorer chat dialog |
 | `ECI_Demo_User` | Permission Set | Object and field access for demo users |
 | `YouTube` | CSP Trusted Site | Enables YouTube video embeds |
 | `Google_Drive` | CSP Trusted Site | Enables Google Drive video embeds |
@@ -72,6 +70,18 @@ The playback component auto-detects and embeds videos from:
 - **Google Drive** -- `drive.google.com/file/d/.../view` links (video must be shared as "Anyone with the link")
 - **Direct URLs** -- Any `.mp4` or `.webm` file URL
 - **No video** -- Shows a dark placeholder with play button (still looks realistic)
+
+## Call Explorer
+
+The playback page includes an "Explore Conversation" button above the video player. Clicking it opens a floating chat dialog that mimics ECI's Call Explorer:
+
+- **Suggested questions** -- Pre-generated questions based on the call scenario are displayed as clickable pills
+- **Free-text input** -- Users can type their own questions about the call
+- **Keyword matching** -- Answers are drawn from scenario-specific Q&A pairs generated during call creation; unmatched questions fall back to transcript excerpt search
+- **Typing animation** -- Answers stream in character-by-character for a realistic AI feel
+- **"Ask another question"** -- Returns to the suggested questions list so the user can keep exploring
+
+No AI/LLM calls are made -- all answers are generated from the call data at record creation time.
 
 ## Built-In Scenarios
 

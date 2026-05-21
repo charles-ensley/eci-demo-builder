@@ -57,13 +57,7 @@
             <!-- Left Sidebar: Meeting Playback metadata -->
             <div class="slds-col sidebar-panel">
                 <div class="panel-section">
-                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
-                        <h2 class="panel-title no-margin">Meeting Playback</h2>
-                        <button class="explore-btn" onclick={handleOpenExplorer}>
-                            <lightning-icon icon-name="utility:einstein" size="xx-small" class="einstein-icon slds-m-right_xx-small"></lightning-icon>
-                            Explore Conversation
-                        </button>
-                    </div>
+                    <h2 class="panel-title">Meeting Playback</h2>
 
                     <!-- Participants -->
                     <div class="slds-m-bottom_small">
@@ -110,6 +104,12 @@
 
             <!-- Center Panel: Video Player -->
             <div class="slds-col center-panel">
+                <div class="explore-btn-row">
+                    <button class="explore-btn" onclick={handleOpenExplorer}>
+                        <lightning-icon icon-name="utility:einstein" size="xx-small" class="einstein-icon slds-m-right_xx-small"></lightning-icon>
+                        Explore Conversation
+                    </button>
+                </div>
                 <div class="video-container">
                     <template lwc:if={isYouTube}>
                         <iframe

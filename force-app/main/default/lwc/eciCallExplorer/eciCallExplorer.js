@@ -110,6 +110,7 @@ export default class EciCallExplorer extends LightningElement {
 
     handleAskAnother() {
         this.currentQuestion = '';
+        this._conversation = [];
         this._activeAnswerIdx = -1;
     }
 

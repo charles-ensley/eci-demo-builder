@@ -21,10 +21,14 @@ A drop-in Salesforce demo asset that replicates Einstein Conversation Insights (
 git clone https://github.com/charles-ensley/eci-demo-builder.git
 cd eci-demo-builder
 
-# Deploy to your default org
-sf project deploy start --target-org <your-org-alias>
+# Deploy and assign permissions in one step
+./scripts/setup.sh <your-org-alias>
+```
 
-# Assign the permission set to your user
+Or if you prefer to do it manually:
+
+```bash
+sf project deploy start --target-org <your-org-alias>
 sf org assign permset --name ECI_Demo_User --target-org <your-org-alias>
 ```
 

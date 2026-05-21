@@ -49,8 +49,8 @@ private class EciDemoControllerTest {
             SELECT Call_Title__c, Customer_Name__c, Transcript_JSON__c,
                    Insights_JSON__c, Summary_Customer_Impression__c,
                    Summary_Call_Overview__c, Summary_Next_Steps__c,
-                   Generative_Insights_JSON__c, Talk_Ratio_Customer__c,
-                   Talk_Ratio_Rep__c, Related_Account__c
+                   Generative_Insights_JSON__c, Call_Explorer_QA_JSON__c,
+                   Talk_Ratio_Customer__c, Talk_Ratio_Rep__c, Related_Account__c
             FROM Demo_Video_Call__c
             WHERE Id = :vcId
         ];
@@ -64,6 +64,7 @@ private class EciDemoControllerTest {
         System.assert(String.isNotBlank(vc.Summary_Call_Overview__c), 'Call overview should be populated');
         System.assert(String.isNotBlank(vc.Summary_Next_Steps__c), 'Next steps should be populated');
         System.assert(String.isNotBlank(vc.Generative_Insights_JSON__c), 'Generative insights should be populated');
+        System.assert(String.isNotBlank(vc.Call_Explorer_QA_JSON__c), 'Explorer QA should be populated');
         System.assert(vc.Talk_Ratio_Customer__c > 0, 'Customer talk ratio should be > 0');
         System.assert(vc.Talk_Ratio_Rep__c > 0, 'Rep talk ratio should be > 0');
 

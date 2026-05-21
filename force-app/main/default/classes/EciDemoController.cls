@@ -27,6 +27,7 @@ public with sharing class EciDemoController {
                    Transcript_JSON__c, Insights_JSON__c,
                    Summary_Customer_Impression__c, Summary_Call_Overview__c,
                    Summary_Next_Steps__c, Generative_Insights_JSON__c,
+                   Call_Explorer_QA_JSON__c,
                    Talk_Ratio_Customer__c, Talk_Ratio_Rep__c,
                    OwnerId, Owner.Name, CreatedDate
             FROM Demo_Video_Call__c

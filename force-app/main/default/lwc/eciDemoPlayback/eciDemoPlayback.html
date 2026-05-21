@@ -57,7 +57,13 @@
             <!-- Left Sidebar: Meeting Playback metadata -->
             <div class="slds-col sidebar-panel">
                 <div class="panel-section">
-                    <h2 class="panel-title">Meeting Playback</h2>
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                        <h2 class="panel-title no-margin">Meeting Playback</h2>
+                        <button class="explore-btn" onclick={handleOpenExplorer}>
+                            <lightning-icon icon-name="utility:einstein" size="xx-small" class="einstein-icon slds-m-right_xx-small"></lightning-icon>
+                            Explore Conversation
+                        </button>
+                    </div>
 
                     <!-- Participants -->
                     <div class="slds-m-bottom_small">
@@ -283,5 +289,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Call Explorer Dialog -->
+        <template lwc:if={showExplorer}>
+            <c-eci-call-explorer
+                call-title={callTitle}
+                transcript-data={transcriptRawData}
+                explorer-qa-data={explorerQaData}
+                summary-data={summaryDataForExplorer}
+                onclose={handleCloseExplorer}>
+            </c-eci-call-explorer>
+        </template>
     </template>
 </template>

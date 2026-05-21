@@ -22,6 +22,7 @@ const FIELDS = [
     'Demo_Video_Call__c.Generative_Insights_JSON__c',
     'Demo_Video_Call__c.Talk_Ratio_Customer__c',
     'Demo_Video_Call__c.Talk_Ratio_Rep__c',
+    'Demo_Video_Call__c.Call_Explorer_QA_JSON__c',
     'Demo_Video_Call__c.OwnerId',
     'Demo_Video_Call__c.Owner.Name'
 ];
@@ -33,6 +34,7 @@ export default class EciDemoPlayback extends LightningElement {
     isLoading = true;
     activeTab = 'transcript';
     collapsedInsights = {};
+    showExplorer = false;
 
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
     wiredCall({ error, data }) {
@@ -352,6 +354,44 @@ export default class EciDemoPlayback extends LightningElement {
         } catch {
             return [];
         }
+    }
+
+    // --- Call Explorer ---
+
+    get explorerQaData() {
+        const raw = this._field('Call_Explorer_QA_JSON__c');
+        if (!raw) return [];
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return [];
+        }
+    }
+
+    get transcriptRawData() {
+        const raw = this._field('Transcript_JSON__c');
+        if (!raw) return [];
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return [];
+        }
+    }
+
+    get summaryDataForExplorer() {
+        return {
+            impression: this.customerImpression,
+            overview: this.callSummary,
+            nextSteps: this._field('Summary_Next_Steps__c') || ''
+        };
+    }
+
+    handleOpenExplorer() {
+        this.showExplorer = true;
+    }
+
+    handleCloseExplorer() {
+        this.showExplorer = false;
     }
 
     // --- Recommendation Events ---

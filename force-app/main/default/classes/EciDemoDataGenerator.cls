@@ -91,6 +91,8 @@ public with sharing class EciDemoDataGenerator {
             genInsightsJson = generateGenerativeInsights(input);
         }
 
+        String explorerQaJson = generateExplorerQA(input, transcript, impression, overview, nextStepsSummary);
+
         Demo_Video_Call__c vc = new Demo_Video_Call__c(
             Call_Title__c                = input.callTitle,
             Call_Started__c              = input.callStarted,
@@ -109,6 +111,7 @@ public with sharing class EciDemoDataGenerator {
             Summary_Call_Overview__c       = overview,
             Summary_Next_Steps__c          = nextStepsSummary,
             Generative_Insights_JSON__c    = genInsightsJson,
+            Call_Explorer_QA_JSON__c       = explorerQaJson,
             Talk_Ratio_Customer__c       = talkRatios.get('customer'),
             Talk_Ratio_Rep__c            = talkRatios.get('rep')
         );
@@ -855,6 +858,132 @@ public with sharing class EciDemoDataGenerator {
         }
 
         return recs;
+    }
+
+    // ── Explorer Q&A generation ────────────────────────────────────────
+
+    public static String generateExplorerQA(CallInput input, List<TranscriptEntry> transcript, String impression, String overview, String nextStepsSummary) {
+        List<Map<String, Object>> qaPairs = new List<Map<String, Object>>();
+        String products = String.join(safe(input.keyProducts), ', ');
+
+        qaPairs.add(buildQA(
+            'What was the outcome of the call?',
+            overview + ' ' + impression,
+            new List<String>{ 'outcome', 'result', 'conclusion', 'ended', 'happen' }
+        ));
+
+        qaPairs.add(buildQA(
+            'What products were discussed?',
+            'The following products were discussed during the call: ' + products + '. ' +
+            input.internalRepName + ' walked through the capabilities and how they align with ' +
+            input.customerCompany + '\'s requirements.',
+            new List<String>{ 'product', 'products', 'solution', 'platform', 'offering', 'feature' }
+        ));
+
+        if (!input.keyObjections.isEmpty()) {
+            String objList = String.join(input.keyObjections, ', ');
+            qaPairs.add(buildQA(
+                'What objections were raised?',
+                input.customerName + ' raised concerns around ' + objList + '. ' +
+                input.internalRepName + ' addressed these by sharing relevant experience and outlining how the solution handles these challenges.',
+                new List<String>{ 'objection', 'concern', 'issue', 'problem', 'worry', 'risk', 'challenge' }
+            ));
+        } else {
+            qaPairs.add(buildQA(
+                'What objections were raised?',
+                'No significant objections were raised during the call. ' + input.customerName +
+                ' was receptive to the discussion and did not express major concerns.',
+                new List<String>{ 'objection', 'concern', 'issue', 'problem', 'worry', 'risk' }
+            ));
+        }
+
+        qaPairs.add(buildQA(
+            'What are the next steps?',
+            nextStepsSummary,
+            new List<String>{ 'next', 'steps', 'follow', 'action', 'todo', 'plan' }
+        ));
+
+        qaPairs.add(buildQA(
+            'How did the customer feel about the call?',
+            impression,
+            new List<String>{ 'sentiment', 'feel', 'feeling', 'impression', 'reaction', 'mood', 'happy', 'satisfied' }
+        ));
+
+        if (input.pricingDiscussed == true) {
+            String pricingAnswer = 'Pricing was discussed during the call. ' +
+                safe(input.pricingDetails, input.internalRepName + ' presented pricing options aligned with ' + input.customerCompany + '\'s requirements and budget.');
+            qaPairs.add(buildQA(
+                'What pricing was discussed?',
+                pricingAnswer,
+                new List<String>{ 'price', 'pricing', 'cost', 'budget', 'money', 'commercial', 'deal', 'terms', 'contract' }
+            ));
+        } else {
+            qaPairs.add(buildQA(
+                'What pricing was discussed?',
+                'Specific pricing was not discussed on this call. The conversation focused on evaluating ' +
+                products + ' and establishing fit before moving to commercial discussions.',
+                new List<String>{ 'price', 'pricing', 'cost', 'budget', 'money', 'commercial', 'deal', 'terms' }
+            ));
+        }
+
+        String competitorAnswer;
+        if (input.scenarioType == 'CompetitiveDisplacement') {
+            competitorAnswer = 'Yes, the customer is actively evaluating alternatives due to dissatisfaction with their current solution. ' +
+                'The conversation centered on how ' + products + ' addresses the gaps in their current vendor\'s offering. ' +
+                input.internalRepName + ' differentiated on reliability, support, and roadmap alignment.';
+        } else {
+            competitorAnswer = 'No specific competitors were mentioned by name during this call. ' +
+                input.customerName + ' appeared to be evaluating the solution on its own merits.';
+        }
+        qaPairs.add(buildQA(
+            'Were competitors mentioned?',
+            competitorAnswer,
+            new List<String>{ 'competitor', 'competition', 'alternative', 'vendor', 'rival', 'versus', 'compared' }
+        ));
+
+        qaPairs.add(buildQA(
+            'Was a follow-up meeting scheduled?',
+            'Yes, ' + input.internalRepName + ' and ' + input.customerName + ' agreed to a follow-up. ' +
+            input.internalRepName + ' committed to sending supporting materials and scheduling the next meeting to continue the conversation.',
+            new List<String>{ 'follow-up', 'followup', 'meeting', 'schedule', 'calendar', 'reconnect', 'booked' }
+        ));
+
+        String participantAnswer = 'The call participants were ' + input.customerName + ' from ' +
+            input.customerCompany + ' (customer) and ' + input.internalRepName + ' from ' +
+            input.internalRepCompany + ' (internal rep). The call lasted ' +
+            input.callDurationMinutes + ' minutes.';
+        qaPairs.add(buildQA(
+            'Who was on the call?',
+            participantAnswer,
+            new List<String>{ 'who', 'participant', 'attendee', 'people', 'person', 'joined', 'present' }
+        ));
+
+        String durationStr = input.callDurationMinutes + ' minutes';
+        Integer customerWords = 0;
+        Integer repWords = 0;
+        for (TranscriptEntry te : transcript) {
+            Integer wc = te.text.split('\\s+').size();
+            if (te.speaker == 'customer') { customerWords += wc; } else { repWords += wc; }
+        }
+        Integer total = customerWords + repWords;
+        String custPct = total > 0 ? String.valueOf(((Decimal) customerWords / total * 100).setScale(0, RoundingMode.HALF_UP)) : '50';
+        String repPct  = total > 0 ? String.valueOf(((Decimal) repWords / total * 100).setScale(0, RoundingMode.HALF_UP)) : '50';
+        qaPairs.add(buildQA(
+            'How long was the call?',
+            'The call lasted ' + durationStr + '. Talk ratio was approximately ' + custPct +
+            '% customer (' + input.customerName + ') and ' + repPct + '% rep (' + input.internalRepName + ').',
+            new List<String>{ 'long', 'duration', 'length', 'minutes', 'time', 'ratio', 'talk' }
+        ));
+
+        return JSON.serialize(qaPairs);
+    }
+
+    private static Map<String, Object> buildQA(String question, String answer, List<String> keywords) {
+        Map<String, Object> qa = new Map<String, Object>();
+        qa.put('question', question);
+        qa.put('answer', answer);
+        qa.put('keywords', keywords);
+        return qa;
     }
 
     // ── Utility ─────────────────────────────────────────────────────────

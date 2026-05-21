@@ -1,0 +1,108 @@
+<template>
+    <div class={dialogClass}>
+        <!-- Title Bar -->
+        <div class="explorer-header">
+            <div class="header-left">
+                <lightning-icon icon-name="utility:einstein" size="xx-small" class="einstein-icon slds-m-right_xx-small"></lightning-icon>
+                <span class="header-title">Call Explorer: {callTitle}</span>
+            </div>
+            <div class="header-actions">
+                <lightning-button-icon
+                    icon-name={minimizeIcon}
+                    alternative-text="Minimize"
+                    size="small"
+                    variant="bare-inverse"
+                    onclick={handleMinimize}>
+                </lightning-button-icon>
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    alternative-text="Close"
+                    size="small"
+                    variant="bare-inverse"
+                    onclick={handleClose}>
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <template lwc:if={isExpanded}>
+            <div class="explorer-body">
+                <!-- Conversation History -->
+                <template lwc:if={hasConversation}>
+                    <div class="conversation-area">
+                        <template for:each={conversationHistory} for:item="msg">
+                            <div key={msg.id} class={msg.cssClass}>
+                                <template lwc:if={msg.isQuestion}>
+                                    <p class="message-text question-text">{msg.text}</p>
+                                </template>
+                                <template lwc:else>
+                                    <div class="answer-card">
+                                        <p class="answer-text">{msg.displayText}</p>
+                                        <template lwc:if={msg.isComplete}>
+                                            <div class="answer-footer">
+                                                <div class="einstein-badge">
+                                                    <lightning-icon icon-name="utility:einstein" size="xx-small" class="einstein-icon slds-m-right_xx-small"></lightning-icon>
+                                                    <lightning-button-icon icon-name="utility:copy_to_clipboard" alternative-text="Copy" size="small" variant="bare"></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:like" alternative-text="Helpful" size="small" variant="bare"></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:dislike" alternative-text="Not helpful" size="small" variant="bare"></lightning-button-icon>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Suggested Questions (shown when no conversation yet) -->
+                <template lwc:if={showSuggestions}>
+                    <div class="suggestions-area">
+                        <p class="suggestions-label">Ask a question about this call:</p>
+                        <div class="suggestion-pills">
+                            <template for:each={suggestedQuestions} for:item="sq">
+                                <button key={sq.id} class="suggestion-pill" onclick={handleSuggestionClick} data-question={sq.text}>
+                                    {sq.text}
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Footer Input -->
+            <div class="explorer-footer">
+                <template lwc:if={isTypingAnswer}>
+                    <div class="typing-indicator">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <template lwc:if={showAskAnother}>
+                        <button class="ask-another-btn" onclick={handleAskAnother}>Ask another question</button>
+                    </template>
+                    <template lwc:else>
+                        <div class="input-row">
+                            <input
+                                type="text"
+                                class="question-input"
+                                placeholder="Type a question..."
+                                value={currentQuestion}
+                                onkeyup={handleKeyUp}
+                                oninput={handleInput}/>
+                            <lightning-button-icon
+                                icon-name="utility:send"
+                                alternative-text="Send"
+                                variant="brand"
+                                onclick={handleSend}
+                                disabled={isSendDisabled}>
+                            </lightning-button-icon>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

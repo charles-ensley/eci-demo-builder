@@ -112,6 +112,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Demo_Video_Call__c.Call_Explorer_QA_JSON__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Call_Recommendation__c.Recommendation_Detail__c</field>
         <readable>true</readable>
     </fieldPermissions>
